@@ -1,0 +1,417 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum UserRole {
+  CUSTOMER
+  DESIGNER
+  TAILOR
+}
+
+enum Location {
+  MG_ROAD
+  COMMERCIAL_STREET
+}
+
+enum BodyShape {
+  RECTANGLE
+  PEAR
+  HOURGLASS
+  APPLE
+  INVERTED_TRIANGLE
+}
+
+enum Language {
+  ENGLISH
+  HINDI
+  KANNADA
+  TAMIL
+  TELUGU
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum DesignNiche {
+  BRIDAL
+  CASUAL
+  FUSION
+  ETHNIC
+  WESTERN
+  FORMAL
+  SPORTSWEAR
+}
+
+enum WardrobeCategory {
+  UPPERWEAR
+  BOTTOMWEAR
+  SHOES
+  BAG
+  JACKET
+  ACCESSORIES
+  DRESS
+  OUTERWEAR
+}
+
+enum AlterationStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELLED
+}
+
+enum PortfolioCategory {
+  BRIDAL
+  CASUAL
+  FUSION
+  ETHNIC
+  WESTERN
+  FORMAL
+  CUSTOM
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  password         String
+  role             UserRole
+  name             String
+  age              Int?
+  isEmailVerified  Boolean  @default(false)
+  emailVerifyToken String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relations
+  customer         Customer?
+  designer         Designer?
+  tailor           Tailor?
+  sentMessages     Message[]
+  notifications    Notification[]
+  messageReactions MessageReaction[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Customer {
+  id                 String     @id @default(cuid())
+  userId             String     @unique
+  user               User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gender             Gender?
+  location           Location?
+  stylePreferences   String[]   @default([])
+  bodyShape          BodyShape?
+  languagePreference Language   @default(ENGLISH)
+  budgetMin          Float?
+  budgetMax          Float?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relations
+  chats                Chat[]
+  alterationRequests   AlterationRequest[]
+  designRequests       DesignRequest[]
+  wardrobeItems        WardrobeItem[]
+  reviews              Review[]
+  chatbotConversations ChatbotConversation[]
+
+  @@index([userId])
+  @@index([location])
+}
+
+model Designer {
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location        String?
+  yearsExperience Int?
+  designNiches    DesignNiche[] @default([])
+  bio             String?       @db.Text
+  languages       Language[]    @default([])
+  profilePhoto    String?
+  contactPhone    String?
+  contactEmail    String?
+  rating          Float         @default(0)
+  reviewCount     Int           @default(0)
+  profileViews    Int           @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  portfolioItems PortfolioItem[]
+  chats          Chat[]
+  designRequests DesignRequest[]
+  reviews        Review[]
+
+  @@index([userId])
+  @@index([location])
+}
+
+model Tailor {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location        String?
+  latitude        Float?
+  longitude       Float?
+  skills          String[] @default([])
+  yearsExperience Int?
+  profilePhoto    String?
+  contactPhone    String?
+  contactEmail    String?
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  sampleWorks        SampleWork[]
+  alterationRequests AlterationRequest[]
+  reviews            Review[]
+  chats              Chat[]
+
+  @@index([userId])
+  @@index([location])
+  @@index([latitude, longitude])
+}
+
+model PortfolioItem {
+  id          String             @id @default(cuid())
+  designerId  String
+  designer    Designer           @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  description String?            @db.Text
+  budgetMin   Float?
+  budgetMax   Float?
+  category    PortfolioCategory?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([designerId])
+  @@index([category])
+}
+
+model SampleWork {
+  id          String   @id @default(cuid())
+  tailorId    String
+  tailor      Tailor   @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tailorId])
+}
+
+model Chat {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  designerId String?
+  designer   Designer? @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  tailorId   String?
+  tailor     Tailor?   @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // Relations
+  messages Message[]
+
+  @@unique([customerId, designerId], map: "customer_designer_unique")
+  @@unique([customerId, tailorId], map: "customer_tailor_unique")
+  @@index([customerId])
+  @@index([designerId])
+  @@index([tailorId])
+  @@index([updatedAt]) // Index for sorting chats by most recent
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  chatId    String
+  chat      Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content   String    @db.Text
+  imageUrl  String?
+  isRead    Boolean   @default(false)
+  readAt    DateTime? // Timestamp when message was read
+  readBy    String? // User ID who read the message
+  createdAt DateTime  @default(now())
+
+  // Relations
+  reactions MessageReaction[]
+
+  @@index([chatId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([chatId, isRead, senderId]) // Composite index for unread count queries
+  @@index([chatId, createdAt]) // Composite index for fetching last message per chat
+  @@index([readBy]) // Index for read receipt queries
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  messageId String
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emoji     String // Emoji character (e.g., "👍", "❤️", "😂")
+  createdAt DateTime @default(now())
+
+  @@unique([messageId, userId, emoji]) // One user can only add one of each emoji per message
+  @@index([messageId])
+  @@index([userId])
+}
+
+model AlterationRequest {
+  id          String           @id @default(cuid())
+  customerId  String
+  customer    Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tailorId    String
+  tailor      Tailor           @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  description String           @db.Text
+  imageUrl    String?
+  status      AlterationStatus @default(PENDING)
+  quotedPrice Float?
+  notes       String?          @db.Text
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([customerId])
+  @@index([tailorId])
+  @@index([status])
+}
+
+model DesignRequest {
+  id                String           @id @default(cuid())
+  customerId        String
+  customer          Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  designerId        String
+  designer          Designer         @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  description       String           @db.Text
+  imageUrl          String?
+  referenceImageUrl String? // Customer's reference image
+  status            AlterationStatus @default(PENDING) // Reuse same status enum
+  quotedPrice       Float?
+  notes             String?          @db.Text
+  chatId            String? // Link to chat conversation
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@index([customerId])
+  @@index([designerId])
+  @@index([status])
+}
+
+model WardrobeItem {
+  id          String             @id @default(cuid())
+  customerId  String
+  customer    Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  category    WardrobeCategory
+  subcategory PortfolioCategory? // For dress types: BRIDAL, CASUAL, FORMAL, ETHNIC, WESTERN, FUSION, CUSTOM
+  color       String?
+  brand       String?
+  name        String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([customerId])
+  @@index([category])
+  @@index([subcategory])
+}
+
+model Review {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  designerId String?
+  designer   Designer? @relation(fields: [designerId], references: [id], onDelete: Cascade)
+  tailorId   String?
+  tailor     Tailor?   @relation(fields: [tailorId], references: [id], onDelete: Cascade)
+  rating     Int // 1-5 stars
+  comment    String?   @db.Text
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([customerId, designerId]) // One review per customer per designer
+  @@unique([customerId, tailorId]) // One review per customer per tailor
+  @@index([customerId])
+  @@index([designerId])
+  @@index([tailorId])
+}
+
+enum NotificationType {
+  MESSAGE
+  CHAT_REQUEST
+  REVIEW
+  PROFILE_VIEW
+  ORDER_UPDATE
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  link      String? // URL to navigate to
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model ChatbotConversation {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  title      String? // Optional title for the conversation
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  messages ChatbotMessage[]
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model ChatbotMessage {
+  id             String              @id @default(cuid())
+  conversationId String
+  conversation   ChatbotConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // 'user' or 'assistant'
+  content        String              @db.Text
+  imageUrl       String?
+  isMock         Boolean             @default(false) // Flag to indicate if this was a mock response
+  createdAt      DateTime            @default(now())
+
+  @@index([conversationId])
+  @@index([createdAt])
+}

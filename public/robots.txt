@@ -1,0 +1,24 @@
+# Neural Threads - robots.txt
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Disallow API routes
+Disallow: /api/
+
+# Disallow auth pages from indexing
+Disallow: /verify-email/
+Disallow: /reset-password/
+
+# Sitemap
+Sitemap: https://neuralthreads.com/sitemap.xml
+
+
+
+
+
+
+
+
+

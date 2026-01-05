@@ -1,0 +1,1956 @@
+================================================================================
+                    CUSTOMER DASHBOARD - COMPLETE DOCUMENTATION
+================================================================================
+
+This document provides a comprehensive, detailed overview of everything related
+to the Customer Dashboard in the Neural Threads application, including all
+functions, API endpoints, database schema, interactions with other dashboards,
+and technical implementation details.
+
+================================================================================
+                            TABLE OF CONTENTS
+================================================================================
+
+1. OVERVIEW
+2. CUSTOMER DASHBOARD PAGES & ROUTES
+3. API ENDPOINTS (Complete List)
+4. DATABASE SCHEMA (Customer-Related Models)
+5. INTERACTIONS WITH OTHER DASHBOARDS
+6. REAL-TIME FEATURES (Socket.IO)
+7. FILE UPLOAD & MEDIA HANDLING
+8. AUTHENTICATION & AUTHORIZATION
+9. CHAT SYSTEM
+10. FEATURE BREAKDOWN
+11. TECHNICAL IMPLEMENTATION DETAILS
+12. DATA FLOW DIAGRAMS
+
+================================================================================
+                                1. OVERVIEW
+================================================================================
+
+The Customer Dashboard is the primary interface for customers to interact with
+designers and tailors, manage their wardrobe, get AI-powered style advice,
+request custom designs and alterations, and communicate with service providers.
+
+Key Capabilities:
+- Browse and search designers and tailors
+- Real-time chat with designers and tailors
+- Manage personal wardrobe
+- AI-powered fashion chatbot
+- Virtual try-on functionality
+- Request custom designs
+- Request alterations
+- Leave reviews and ratings
+- View notifications
+- Manage profile and preferences
+
+================================================================================
+                    2. CUSTOMER DASHBOARD PAGES & ROUTES
+================================================================================
+
+2.1 MAIN DASHBOARD
+Route: /customer
+File: src/app/(dashboard)/customer/page.tsx
+
+Features:
+- Welcome banner with personalized greeting
+- Statistics cards:
+  * Active Chats count
+  * Saved Designers count
+  * Wardrobe Items count
+  * Consultations (Alteration Requests) count
+- Recommended Designers section (top 5 based on rating)
+- Recent Activity feed (chats, alterations, notifications)
+- Quick Actions:
+  * Upload to Wardrobe
+  * Get Style Advice (AI Chatbot)
+- Premium upsell card
+- Style tip of the day
+
+API Calls:
+- GET /api/chat (fetch chats)
+- GET /api/chatbot/wardrobe (fetch wardrobe items)
+- GET /api/alterations (fetch alteration requests)
+- GET /api/designers?limit=5&sortBy=rating&sortOrder=desc
+- GET /api/notifications?limit=10
+
+2.2 BROWSE DESIGNERS
+Route: /customer/designers
+File: src/app/(dashboard)/customer/designers/page.tsx
+
+Features:
+- Designer listing with pagination
+- Advanced filtering:
+  * Search by name
+  * Filter by design niches (BRIDAL, CASUAL, FORMAL, ETHNIC, WESTERN, FUSION, SPORTSWEAR)
+  * Filter by location (MG_ROAD, COMMERCIAL_STREET)
+  * Filter by experience (min/max years)
+  * Filter by budget range (min/max)
+  * Filter by languages (ENGLISH, HINDI, KANNADA, TAMIL, TELUGU)
+- Sorting options:
+  * By rating (default)
+  * By experience
+  * By review count
+- Designer cards showing:
+  * Profile photo/avatar
+  * Name
+  * Location
+  * Rating and review count
+  * Design niches
+  * Languages spoken
+  * Years of experience
+  * Portfolio preview
+- Quick actions:
+  * View Profile
+  * Chat Now (creates chat if doesn't exist)
+
+API Calls:
+- GET /api/designers?search=&niche=&location=&minExperience=&maxExperience=&minBudget=&maxBudget=&language=&page=&limit=&sortBy=&sortOrder=
+
+2.3 DESIGNER PROFILE
+Route: /customer/designers/[id]
+File: src/app/(dashboard)/customer/designers/[id]/page.tsx
+
+Features:
+- Full designer profile view
+- Portfolio gallery with filtering by category
+- Designer information:
+  * Bio
+  * Location
+  * Contact details (phone, email)
+  * Years of experience
+  * Design niches
+  * Languages spoken
+  * Rating and review count
+- Reviews section:
+  * View all reviews
+  * Submit new review (if not already reviewed)
+  * Rating (1-5 stars)
+  * Comment
+- Similar designers recommendations
+- Portfolio items with:
+  * Image
+  * Description
+  * Budget range (min/max)
+  * Category
+- Actions:
+  * Chat with Designer
+  * Share profile
+  * Save to favorites (future feature)
+
+API Calls:
+- GET /api/designers/[id]
+- GET /api/reviews?designerId=[id]
+- POST /api/reviews (create review)
+- GET /api/auth/me (check if user can review)
+
+2.4 BROWSE TAILORS
+Route: /customer/tailors
+File: src/app/(dashboard)/customer/tailors/page.tsx
+
+Features:
+- Tailor listing with location-based search
+- Advanced filtering:
+  * Search by name
+  * Filter by skills (ALTERATIONS, STITCHING, EMBROIDERY, BUTTON_WORK, ZIPPER_REPAIR, HEMMING, CUSTOM_FITTING, BRIDAL_WORK, ETHNIC_WEAR, WESTERN_WEAR)
+  * Filter by location
+  * Filter by experience (min/max years)
+  * Sort by distance (nearest first)
+  * Sort by rating
+  * Sort by experience
+- Location-based distance calculation (PostGIS)
+- Tailor cards showing:
+  * Profile photo/avatar
+  * Name
+  * Location
+  * Distance from customer
+  * Rating and review count
+  * Skills
+  * Years of experience
+  * Contact information
+  * Sample work gallery
+- Quick actions:
+  * View Profile
+  * Request Alteration
+  * Chat Now
+  * Call (phone number)
+  * Email
+
+API Calls:
+- GET /api/tailors?location=&skills=&minExperience=&maxExperience=&sortBy=&maxDistance=
+- GET /api/reviews?tailorId=[id]
+- POST /api/reviews (create review)
+- POST /api/alterations (create alteration request)
+- POST /api/upload (upload alteration image)
+
+2.5 CHAT LIST
+Route: /customer/chats
+File: src/app/(dashboard)/customer/chats/page.tsx
+
+Features:
+- List of all chat conversations
+- Chat cards showing:
+  * Other user's name (designer/tailor)
+  * Avatar
+  * Last message preview
+  * Timestamp
+  * Unread message count
+  * Online status indicator
+- Filtering and search
+- Create new chat button
+- Real-time updates via Socket.IO
+
+API Calls:
+- GET /api/chat
+
+2.6 INDIVIDUAL CHAT
+Route: /customer/chats/[chatId]
+File: src/app/(dashboard)/customer/chats/[chatId]/page.tsx
+
+Features:
+- Full chat interface
+- Message display with:
+  * Sender name
+  * Message content
+  * Timestamp
+  * Image attachments
+  * Read receipts (single/double check)
+  * Message reactions (emoji)
+- Typing indicators
+- Message input with:
+  * Text input
+  * Image upload
+  * Emoji picker
+- Design request submission (if chatting with designer)
+- Real-time message delivery via Socket.IO
+- Polling fallback (if Socket.IO disconnected)
+- Auto-scroll to latest message
+- Mark messages as read automatically
+
+API Calls:
+- GET /api/chat (fetch chat list)
+- GET /api/chat/messages?chatId=[chatId]&limit=20&cursor=
+- POST /api/chat/messages (send message)
+- POST /api/chat/messages/[messageId]/read (mark as read)
+- POST /api/chat/messages/[messageId]/reactions (add/remove reaction)
+- GET /api/chat/messages/[messageId]/reactions (get reactions)
+- POST /api/design-requests (submit design request)
+
+2.7 NEW CHAT
+Route: /customer/chats/new
+File: src/app/(dashboard)/customer/chats/new/page.tsx
+
+Features:
+- Create new chat conversation
+- Select designer or tailor
+- Search for designer/tailor
+- Create chat and redirect to chat page
+
+API Calls:
+- POST /api/chat (create new chat)
+
+2.8 WARDROBE MANAGEMENT
+Route: /customer/wardrobe
+File: src/app/(dashboard)/customer/wardrobe/page.tsx
+
+Features:
+- View all wardrobe items
+- Filter by subcategory (for dresses):
+  * BRIDAL, CASUAL, FORMAL, ETHNIC, WESTERN, FUSION, CUSTOM
+- Search wardrobe items
+- Upload new items:
+  * Image upload
+  * Category selection (always DRESS for dress subcategories)
+  * Subcategory selection
+  * Color input (optional)
+  * Name input (optional)
+- Delete wardrobe items
+- Grid view of items
+- Item details:
+  * Image
+  * Category
+  * Subcategory
+  * Color
+  * Brand
+  * Name
+  * Created date
+
+API Calls:
+- GET /api/chatbot/wardrobe
+- POST /api/chatbot/wardrobe (upload item)
+- DELETE /api/chatbot/wardrobe?id=[itemId]
+
+2.9 AI CHATBOT
+Route: /customer/chatbot
+File: src/app/(dashboard)/customer/chatbot/page.tsx
+
+Features:
+- AI-powered fashion stylist interface
+- Conversation history
+- Outfit recommendations
+- Style advice
+- Wardrobe management suggestions
+- Designer/tailor recommendations
+- Image upload support
+- Context-aware responses based on:
+  * User profile (body shape, style preferences)
+  * Wardrobe items
+  * Conversation history
+- Special formatting for:
+  * Outfit recommendations
+  * Designer recommendations
+  * Tailor recommendations
+  * Chat links
+
+API Calls:
+- POST /api/chatbot (send message)
+- GET /api/chatbot/conversations (list conversations)
+- POST /api/chatbot/conversations (create conversation)
+- GET /api/chatbot/conversations/[id]/messages (get messages)
+- GET /api/chatbot/wardrobe (get wardrobe for context)
+
+2.10 VIRTUAL TRY-ON
+Route: /customer/virtual-tryon
+File: src/app/(dashboard)/customer/virtual-tryon/page.tsx
+
+Features:
+- Virtual try-on interface
+- Camera integration
+- Upload outfit images
+- Process try-on
+- View results
+
+API Calls:
+- POST /api/virtual-tryon (process try-on)
+- GET /api/virtual-tryon (get try-on history)
+
+2.11 ALTERATION REQUESTS
+Route: /customer/alterations
+File: src/app/(dashboard)/customer/alterations/page.tsx
+
+Features:
+- View all alteration requests
+- Filter by status:
+  * PENDING
+  * IN_PROGRESS
+  * COMPLETED
+  * REJECTED
+- Search requests
+- Request details:
+  * Tailor name and location
+  * Description
+  * Image
+  * Status
+  * Notes
+  * Created date
+  * Status message
+
+API Calls:
+- GET /api/alterations
+
+2.12 BROWSE DESIGNS
+Route: /customer/designs
+File: src/app/(dashboard)/customer/designs/page.tsx
+
+Features:
+- Browse all portfolio designs from all designers
+- Filter by category
+- Filter by price range
+- Search designs
+- Grid/List view toggle
+- Save designs to wardrobe
+- View designer information
+- Link to designer profile
+
+API Calls:
+- GET /api/designs?category=&minPrice=&maxPrice=
+- GET /api/chatbot/wardrobe (check saved designs)
+
+================================================================================
+                        3. API ENDPOINTS (COMPLETE LIST)
+================================================================================
+
+3.1 AUTHENTICATION ENDPOINTS
+
+GET /api/auth/me
+- Description: Get current authenticated user
+- Method: GET
+- Auth: Required (JWT)
+- Response: User object with profile data
+- Used by: All customer pages for user context
+
+POST /api/auth/login
+- Description: User login
+- Method: POST
+- Body: { email, password }
+- Response: { success, token, user }
+- Used by: Login page
+
+POST /api/auth/logout
+- Description: User logout
+- Method: POST
+- Auth: Required
+- Response: { success }
+- Used by: Logout functionality
+
+POST /api/auth/signup
+- Description: Customer signup
+- Method: POST
+- Body: { email, password, name, ...customer profile data }
+- Response: { success, user }
+- Used by: Signup page
+
+GET /api/auth/refresh
+- Description: Refresh JWT token
+- Method: GET
+- Auth: Required
+- Response: { success, token }
+
+3.2 USER PROFILE ENDPOINTS
+
+GET /api/users/profile
+- Description: Get user profile
+- Method: GET
+- Auth: Required
+- Response: { success, data: { user, customer } }
+
+PUT /api/users/profile
+- Description: Update user profile
+- Method: PUT
+- Auth: Required
+- Body: { name, ...profile fields }
+- Response: { success, data }
+
+PUT /api/users/password
+- Description: Change password
+- Method: PUT
+- Auth: Required
+- Body: { currentPassword, newPassword }
+- Response: { success }
+
+DELETE /api/users/account
+- Description: Delete account
+- Method: DELETE
+- Auth: Required
+- Response: { success }
+
+3.3 DESIGNER ENDPOINTS
+
+GET /api/designers
+- Description: List designers with filters
+- Method: GET
+- Query Params:
+  * search: string (name search)
+  * niche: DesignNiche[] (array)
+  * location: Location
+  * minExperience: number
+  * maxExperience: number
+  * minBudget: number
+  * maxBudget: number
+  * language: Language[] (array)
+  * page: number (default: 1)
+  * limit: number (default: 12)
+  * sortBy: 'rating' | 'experience' | 'reviews'
+  * sortOrder: 'asc' | 'desc'
+- Response: { success, data: Designer[], pagination }
+- Used by: /customer/designers, /customer (recommended designers)
+
+GET /api/designers/[id]
+- Description: Get designer details
+- Method: GET
+- Response: { success, data: Designer with portfolio, reviews }
+- Used by: /customer/designers/[id]
+
+3.4 TAILOR ENDPOINTS
+
+GET /api/tailors
+- Description: List tailors with location-based filtering
+- Method: GET
+- Query Params:
+  * location: Location
+  * skills: string[] (array)
+  * minExperience: number
+  * maxExperience: number
+  * sortBy: 'distance' | 'rating' | 'experience'
+  * maxDistance: number (km, for distance sorting)
+  * latitude: number (customer location)
+  * longitude: number (customer location)
+- Response: { success, data: Tailor[] with distance }
+- Used by: /customer/tailors
+- Note: Uses PostGIS for distance calculation
+
+GET /api/tailors/[id]
+- Description: Get tailor details
+- Method: GET
+- Response: { success, data: Tailor with sample work }
+
+3.5 CHAT ENDPOINTS
+
+GET /api/chat
+- Description: Get user's chat list
+- Method: GET
+- Auth: Required
+- Response: { success, data: Chat[] with last message, unread count }
+- Used by: /customer/chats, /customer/chats/[chatId]
+- Note: Optimized for Customer role with includes
+
+POST /api/chat
+- Description: Create new chat
+- Method: POST
+- Auth: Required
+- Body: { designerId?: string, tailorId?: string }
+- Response: { success, data: Chat }
+- Used by: /customer/chats/new
+
+GET /api/chat/messages
+- Description: Get messages for a chat
+- Method: GET
+- Auth: Required
+- Query Params:
+  * chatId: string (required)
+  * cursor: string (for pagination)
+  * limit: number (default: 20, max: 50)
+- Response: { success, data: Message[], hasMore, nextCursor }
+- Used by: /customer/chats/[chatId]
+- Note: Includes reactions, sender info, read status
+
+POST /api/chat/messages
+- Description: Send message
+- Method: POST
+- Auth: Required
+- Body: { chatId, content, imageUrl? }
+- Response: { success, data: Message }
+- Used by: ChatWindow component
+- Note: Emits Socket.IO event, creates notification
+
+POST /api/chat/messages/[messageId]/read
+- Description: Mark message as read
+- Method: POST
+- Auth: Required
+- Response: { success, data: Message }
+- Used by: ChatWindow (auto-mark on view)
+- Note: Emits Socket.IO event for real-time update
+
+POST /api/chat/messages/[messageId]/reactions
+- Description: Add/remove reaction to message
+- Method: POST
+- Auth: Required
+- Body: { emoji: string, action: 'add' | 'remove' | 'toggle' }
+- Response: { success, data: { reaction, reactions: [] } }
+- Used by: MessageBubble component
+- Note: Emits Socket.IO event
+
+GET /api/chat/messages/[messageId]/reactions
+- Description: Get all reactions for a message
+- Method: GET
+- Auth: Required
+- Response: { success, data: MessageReaction[] }
+
+3.6 WARDROBE ENDPOINTS
+
+GET /api/chatbot/wardrobe
+- Description: Get customer's wardrobe items
+- Method: GET
+- Auth: Required
+- Response: { success, data: { items: WardrobeItem[] } }
+- Used by: /customer/wardrobe, /customer/chatbot, /customer (stats)
+
+POST /api/chatbot/wardrobe
+- Description: Add wardrobe item
+- Method: POST
+- Auth: Required
+- Body: FormData { file, category, subcategory?, color?, name? }
+- Response: { success, data: WardrobeItem }
+- Used by: /customer/wardrobe
+
+DELETE /api/chatbot/wardrobe?id=[itemId]
+- Description: Delete wardrobe item
+- Method: DELETE
+- Auth: Required
+- Response: { success }
+- Used by: /customer/wardrobe
+
+3.7 AI CHATBOT ENDPOINTS
+
+POST /api/chatbot
+- Description: Send message to AI chatbot
+- Method: POST
+- Auth: Required
+- Body: { message, conversationId?, imageUrl? }
+- Response: { success, data: { response, conversationId } }
+- Used by: /customer/chatbot
+- Note: Uses Gemini API, includes wardrobe context
+
+GET /api/chatbot/conversations
+- Description: Get chatbot conversations
+- Method: GET
+- Auth: Required
+- Response: { success, data: ChatbotConversation[] }
+
+POST /api/chatbot/conversations
+- Description: Create new chatbot conversation
+- Method: POST
+- Auth: Required
+- Response: { success, data: ChatbotConversation }
+
+GET /api/chatbot/conversations/[id]/messages
+- Description: Get messages for conversation
+- Method: GET
+- Auth: Required
+- Response: { success, data: ChatbotMessage[] }
+
+3.8 ALTERATION REQUEST ENDPOINTS
+
+GET /api/alterations
+- Description: Get customer's alteration requests
+- Method: GET
+- Auth: Required
+- Response: { success, data: AlterationRequest[] }
+- Used by: /customer/alterations, /customer (stats)
+
+POST /api/alterations
+- Description: Create alteration request
+- Method: POST
+- Auth: Required
+- Body: { tailorId, description, imageUrl? }
+- Response: { success, data: AlterationRequest }
+- Used by: /customer/tailors
+- Note: Creates notification for tailor
+
+GET /api/alterations/[id]
+- Description: Get alteration request details
+- Method: GET
+- Auth: Required
+- Response: { success, data: AlterationRequest }
+
+PUT /api/alterations/[id]
+- Description: Update alteration request (customer can cancel)
+- Method: PUT
+- Auth: Required
+- Body: { status: 'CANCELLED' }
+- Response: { success, data: AlterationRequest }
+
+3.9 DESIGN REQUEST ENDPOINTS
+
+POST /api/design-requests
+- Description: Create design request
+- Method: POST
+- Auth: Required
+- Body: { designerId, description, imageUrl?, referenceImageUrl?, chatId? }
+- Response: { success, data: DesignRequest }
+- Used by: ChatWindow (design request modal)
+- Note: Creates notification for designer
+
+GET /api/design-requests
+- Description: Get customer's design requests
+- Method: GET
+- Auth: Required
+- Response: { success, data: DesignRequest[] }
+
+GET /api/design-requests/[id]
+- Description: Get design request details
+- Method: GET
+- Auth: Required
+- Response: { success, data: DesignRequest }
+
+3.10 REVIEW ENDPOINTS
+
+GET /api/reviews
+- Description: Get reviews
+- Method: GET
+- Query Params:
+  * designerId?: string
+  * tailorId?: string
+- Response: { success, data: Review[] }
+- Used by: /customer/designers/[id], /customer/tailors
+
+POST /api/reviews
+- Description: Create review
+- Method: POST
+- Auth: Required
+- Body: { designerId?, tailorId?, rating: 1-5, comment? }
+- Response: { success, data: Review }
+- Used by: /customer/designers/[id], /customer/tailors
+- Note: One review per customer per designer/tailor
+
+3.11 DESIGN ENDPOINTS
+
+GET /api/designs
+- Description: Get all portfolio designs
+- Method: GET
+- Query Params:
+  * category?: PortfolioCategory
+  * minPrice?: number
+  * maxPrice?: number
+- Response: { success, data: PortfolioItem[] }
+- Used by: /customer/designs
+
+3.12 UPLOAD ENDPOINTS
+
+POST /api/upload
+- Description: Upload file to Cloudinary
+- Method: POST
+- Auth: Required
+- Body: FormData { file }
+- Response: { success, data: { url, publicId } }
+- Used by: Multiple pages for image uploads
+
+DELETE /api/upload/[publicId]
+- Description: Delete file from Cloudinary
+- Method: DELETE
+- Auth: Required
+- Response: { success }
+
+3.13 NOTIFICATION ENDPOINTS
+
+GET /api/notifications
+- Description: Get user notifications
+- Method: GET
+- Auth: Required
+- Query Params:
+  * limit?: number
+  * unreadOnly?: boolean
+- Response: { success, data: Notification[] }
+- Used by: /customer (activity feed)
+
+PUT /api/notifications/[id]/read
+- Description: Mark notification as read
+- Method: PUT
+- Auth: Required
+- Response: { success }
+
+3.14 VIRTUAL TRY-ON ENDPOINTS
+
+POST /api/virtual-tryon
+- Description: Process virtual try-on
+- Method: POST
+- Auth: Required
+- Body: { bodyShape?, outfitImageUrl }
+- Response: { success, data: VirtualTryOn }
+
+GET /api/virtual-tryon
+- Description: Get try-on history
+- Method: GET
+- Auth: Required
+- Response: { success, data: VirtualTryOn[] }
+
+3.15 SECURITY ENDPOINTS
+
+GET /api/security/csrf
+- Description: Get CSRF token
+- Method: GET
+- Response: { success, data: { token } }
+- Used by: All secure forms
+
+================================================================================
+                   4. DATABASE SCHEMA (CUSTOMER-RELATED MODELS)
+================================================================================
+
+4.1 USER MODEL
+Table: User
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- email: String (unique)
+- password: String (hashed)
+- role: UserRole (CUSTOMER | DESIGNER | TAILOR)
+- name: String
+- age: Int?
+- isEmailVerified: Boolean (default: false)
+- emailVerifyToken: String?
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer? (one-to-one)
+- sentMessages: Message[]
+- notifications: Notification[]
+- messageReactions: MessageReaction[]
+
+Indexes:
+- email (unique)
+- role
+
+4.2 CUSTOMER MODEL
+Table: Customer
+Primary Key: id (String, cuid)
+Foreign Key: userId -> User.id (unique, cascade delete)
+
+Fields:
+- id: String (cuid)
+- userId: String (unique, references User.id)
+- gender: Gender? (MALE | FEMALE | OTHER)
+- location: Location? (MG_ROAD | COMMERCIAL_STREET)
+- stylePreferences: String[] (array, default: [])
+- bodyShape: BodyShape? (RECTANGLE | PEAR | HOURGLASS | APPLE | INVERTED_TRIANGLE)
+- languagePreference: Language (default: ENGLISH)
+- budgetMin: Float?
+- budgetMax: Float?
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- user: User (one-to-one)
+- chats: Chat[]
+- alterationRequests: AlterationRequest[]
+- designRequests: DesignRequest[]
+- wardrobeItems: WardrobeItem[]
+- virtualTryOns: VirtualTryOn[]
+- reviews: Review[]
+- chatbotConversations: ChatbotConversation[]
+
+Indexes:
+- userId (unique)
+- location
+
+4.3 CHAT MODEL
+Table: Chat
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- designerId: String? (references Designer.id, cascade delete)
+- tailorId: String? (references Tailor.id, cascade delete)
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+- designer: Designer?
+- tailor: Tailor?
+- messages: Message[]
+
+Unique Constraints:
+- (customerId, designerId) - one chat per customer-designer pair
+- (customerId, tailorId) - one chat per customer-tailor pair
+
+Indexes:
+- customerId
+- designerId
+- tailorId
+- updatedAt (for sorting by recent activity)
+
+4.4 MESSAGE MODEL
+Table: Message
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- chatId: String (references Chat.id, cascade delete)
+- senderId: String (references User.id, cascade delete)
+- content: String (Text)
+- imageUrl: String?
+- isRead: Boolean (default: false)
+- readAt: DateTime? (timestamp when read)
+- readBy: String? (User ID who read)
+- createdAt: DateTime
+
+Relations:
+- chat: Chat
+- sender: User
+- reactions: MessageReaction[]
+
+Indexes:
+- chatId
+- senderId
+- createdAt
+- (chatId, isRead, senderId) - composite for unread count queries
+- (chatId, createdAt) - composite for last message queries
+- readBy - for read receipt queries
+
+4.5 MESSAGE REACTION MODEL
+Table: MessageReaction
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- messageId: String (references Message.id, cascade delete)
+- userId: String (references User.id, cascade delete)
+- emoji: String (emoji character)
+- createdAt: DateTime
+
+Relations:
+- message: Message
+- user: User
+
+Unique Constraint:
+- (messageId, userId, emoji) - one reaction per user per emoji per message
+
+Indexes:
+- messageId
+- userId
+
+4.6 WARDROBE ITEM MODEL
+Table: WardrobeItem
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- imageUrl: String
+- category: WardrobeCategory (UPPERWEAR | BOTTOMWEAR | SHOES | BAG | JACKET | ACCESSORIES | DRESS | OUTERWEAR)
+- subcategory: PortfolioCategory? (BRIDAL | CASUAL | FORMAL | ETHNIC | WESTERN | FUSION | CUSTOM)
+- color: String?
+- brand: String?
+- name: String?
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+
+Indexes:
+- customerId
+- category
+- subcategory
+
+4.7 ALTERATION REQUEST MODEL
+Table: AlterationRequest
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- tailorId: String (references Tailor.id, cascade delete)
+- description: String (Text)
+- imageUrl: String?
+- status: AlterationStatus (PENDING | ACCEPTED | IN_PROGRESS | COMPLETED | REJECTED | CANCELLED)
+- quotedPrice: Float?
+- notes: String? (Text)
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+- tailor: Tailor
+
+Indexes:
+- customerId
+- tailorId
+- status
+
+4.8 DESIGN REQUEST MODEL
+Table: DesignRequest
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- designerId: String (references Designer.id, cascade delete)
+- description: String (Text)
+- imageUrl: String?
+- referenceImageUrl: String? (customer's reference image)
+- status: AlterationStatus (reused enum)
+- quotedPrice: Float?
+- notes: String? (Text)
+- chatId: String? (link to chat conversation)
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+- designer: Designer
+
+Indexes:
+- customerId
+- designerId
+- status
+
+4.9 REVIEW MODEL
+Table: Review
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- designerId: String? (references Designer.id, cascade delete)
+- tailorId: String? (references Tailor.id, cascade delete)
+- rating: Int (1-5 stars)
+- comment: String? (Text)
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+- designer: Designer?
+- tailor: Tailor?
+
+Unique Constraints:
+- (customerId, designerId) - one review per customer per designer
+- (customerId, tailorId) - one review per customer per tailor
+
+Indexes:
+- customerId
+- designerId
+- tailorId
+
+4.10 VIRTUAL TRY-ON MODEL
+Table: VirtualTryOn
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- bodyShape: BodyShape?
+- outfitImageUrl: String
+- resultImageUrl: String?
+- isProcessed: Boolean (default: false)
+- createdAt: DateTime
+
+Relations:
+- customer: Customer
+
+Indexes:
+- customerId
+
+4.11 CHATBOT CONVERSATION MODEL
+Table: ChatbotConversation
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- customerId: String (references Customer.id, cascade delete)
+- title: String? (optional title)
+- createdAt: DateTime
+- updatedAt: DateTime
+
+Relations:
+- customer: Customer
+- messages: ChatbotMessage[]
+
+Indexes:
+- customerId
+- createdAt
+
+4.12 CHATBOT MESSAGE MODEL
+Table: ChatbotMessage
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- conversationId: String (references ChatbotConversation.id, cascade delete)
+- role: String ('user' | 'assistant')
+- content: String (Text)
+- imageUrl: String?
+- isMock: Boolean (default: false)
+- createdAt: DateTime
+
+Relations:
+- conversation: ChatbotConversation
+
+Indexes:
+- conversationId
+- createdAt
+
+4.13 NOTIFICATION MODEL
+Table: Notification
+Primary Key: id (String, cuid)
+
+Fields:
+- id: String (cuid)
+- userId: String (references User.id, cascade delete)
+- type: NotificationType (MESSAGE | CHAT_REQUEST | REVIEW | PROFILE_VIEW | ORDER_UPDATE)
+- title: String
+- message: String (Text)
+- link: String? (URL to navigate)
+- isRead: Boolean (default: false)
+- createdAt: DateTime
+
+Relations:
+- user: User
+
+Indexes:
+- userId
+- isRead
+- createdAt
+
+================================================================================
+                 5. INTERACTIONS WITH OTHER DASHBOARDS
+================================================================================
+
+5.1 CUSTOMER ↔ DESIGNER INTERACTIONS
+
+Chat Communication:
+- Customer can initiate chat with any designer
+- Real-time messaging via Socket.IO
+- Messages stored in Chat and Message tables
+- Design requests can be submitted through chat
+- Designers receive notifications for new messages and requests
+
+Design Requests:
+- Customer creates design request via POST /api/design-requests
+- Request includes: description, images, reference images
+- Designer receives notification
+- Request linked to chat conversation (optional)
+- Status tracking: PENDING → ACCEPTED → IN_PROGRESS → COMPLETED
+
+Reviews:
+- Customer can leave one review per designer
+- Review includes: rating (1-5), comment
+- Designer's rating and review count updated automatically
+- Reviews visible on designer profile
+
+Portfolio Viewing:
+- Customer can browse designer's portfolio
+- Portfolio items show budget ranges
+- Customer can save portfolio items to wardrobe
+- Portfolio items used for outfit recommendations
+
+5.2 CUSTOMER ↔ TAILOR INTERACTIONS
+
+Chat Communication:
+- Customer can initiate chat with any tailor
+- Real-time messaging via Socket.IO
+- Messages stored in Chat and Message tables
+- Alteration requests can be submitted through chat or directly
+
+Alteration Requests:
+- Customer creates alteration request via POST /api/alterations
+- Request includes: description, image of item to alter
+- Tailor receives notification
+- Status tracking: PENDING → ACCEPTED → IN_PROGRESS → COMPLETED → REJECTED
+- Tailor can add quoted price and notes
+- Customer can cancel request (status: CANCELLED)
+
+Reviews:
+- Customer can leave one review per tailor
+- Review includes: rating (1-5), comment
+- Tailor's rating and review count updated automatically
+- Reviews visible on tailor profile
+
+Location-Based Matching:
+- Customer location used to find nearby tailors
+- Distance calculated using PostGIS (geography type)
+- Tailors sorted by distance when location provided
+- Customer can filter tailors by location
+
+5.3 REAL-TIME COMMUNICATION
+
+Socket.IO Events:
+- Customer connects to Socket.IO server
+- Joins chat rooms for active conversations
+- Receives real-time messages
+- Receives typing indicators
+- Receives read receipts
+- Receives message reactions
+- Receives online/offline status updates
+
+Event Flow:
+1. Customer sends message → API endpoint → Database → Socket.IO emit
+2. Designer/Tailor receives via Socket.IO → Updates UI
+3. Designer/Tailor reads message → API endpoint → Database → Socket.IO emit
+4. Customer receives read receipt → Updates UI
+
+5.4 NOTIFICATION SYSTEM
+
+Notification Types:
+- MESSAGE: New message in chat
+- CHAT_REQUEST: New chat initiated
+- REVIEW: New review received
+- PROFILE_VIEW: Profile viewed (future)
+- ORDER_UPDATE: Request status changed
+
+Notification Flow:
+1. Event occurs (message, request, etc.)
+2. createNotification() called
+3. Notification created in database
+4. Notification sent to user (email/push - future)
+5. User sees notification in dashboard
+
+5.5 DATA SHARING
+
+Customer Profile Data:
+- Style preferences visible to designers (for recommendations)
+- Body shape used for outfit suggestions
+- Budget range used for filtering
+- Location used for tailor matching
+
+Wardrobe Data:
+- Wardrobe items used by AI chatbot for recommendations
+- Can be shared with designers for custom design inspiration
+- Used for virtual try-on body shape detection
+
+Chat History:
+- Shared between customer and designer/tailor
+- Persistent across sessions
+- Includes messages, images, reactions, read status
+
+================================================================================
+                   6. REAL-TIME FEATURES (SOCKET.IO)
+================================================================================
+
+6.1 SOCKET.IO CONNECTION
+
+Client Setup:
+- File: src/lib/socket/client.ts
+- Function: getSocket() - returns Socket instance
+- Connection URL: process.env.SOCKET_URL or localhost:3001
+- Auto-reconnect enabled
+- Connection state managed globally
+
+Connection Flow:
+1. Customer opens chat page
+2. connectSocket(userId, userName, role) called
+3. Socket connects to server
+4. Socket emits 'register' event with user data
+5. Server stores user in active users map
+6. Socket joins chat rooms for user's active chats
+
+6.2 CHAT ROOMS
+
+Room Structure:
+- Format: `chat:{chatId}`
+- Customer automatically joins rooms for their chats
+- Designer/Tailor joins when they open chat
+- Messages broadcast to all users in room
+
+Joining Rooms:
+- Event: 'join-chat' or 'joinChat'
+- Payload: { chatId, userId }
+- Server adds socket to room
+- Confirmation emitted back
+
+6.3 MESSAGE EVENTS
+
+Sending Messages:
+- Event: 'send-message'
+- Payload: { chatId, content, senderId, imageUrl? }
+- Note: Messages actually created via API, socket used for real-time delivery
+- Server broadcasts to room
+
+Receiving Messages:
+- Event: 'receive-message'
+- Payload: { id, chatId, content, senderId, senderName, imageUrl, isRead, createdAt, reactions? }
+- Client updates UI immediately
+- Message added to state
+
+6.4 TYPING INDICATORS
+
+Sending Typing:
+- Event: 'typing'
+- Payload: { chatId, userId, userName }
+- Server broadcasts to room (except sender)
+- Auto-stops after 2 seconds of inactivity
+
+Receiving Typing:
+- Event: 'user-typing'
+- Payload: { userId, userName, isTyping: true }
+- Client shows typing indicator
+- Stops when 'stop-typing' received
+
+6.5 READ RECEIPTS
+
+Message Read:
+- Event: 'message-read'
+- Payload: { messageId, readBy, readAt }
+- Triggered when message marked as read via API
+- Server broadcasts to chat room
+- Client updates message read status
+
+6.6 MESSAGE REACTIONS
+
+Reaction Added/Removed:
+- Event: 'message-reaction'
+- Payload: { messageId, emoji, userId, action: 'added' | 'removed' }
+- Triggered when reaction added/removed via API
+- Server broadcasts to chat room
+- Client fetches updated reactions
+
+6.7 ONLINE/OFFLINE STATUS
+
+User Online:
+- Event: 'user-online'
+- Payload: { userId }
+- Emitted when user connects
+- Other users see online indicator
+
+User Offline:
+- Event: 'user-offline'
+- Payload: { userId }
+- Emitted when user disconnects
+- Other users see offline indicator
+
+6.8 FALLBACK MECHANISMS
+
+Polling:
+- If Socket.IO disconnected, client polls API every 10 seconds
+- Fetches new messages via GET /api/chat/messages
+- Stops polling when socket reconnects
+- Prevents message loss
+
+Connection Retry:
+- Auto-reconnect on disconnect
+- Exponential backoff
+- Manual reconnect button (future)
+
+================================================================================
+                   7. FILE UPLOAD & MEDIA HANDLING
+================================================================================
+
+7.1 UPLOAD ENDPOINT
+
+POST /api/upload
+- Accepts: FormData with 'file' field
+- File types: Images (jpeg, png, gif, webp)
+- Max size: 5MB (configurable)
+- Storage: Cloudinary
+- Response: { success, data: { url, publicId } }
+
+7.2 UPLOAD FLOW
+
+1. User selects file
+2. Client validates file (type, size)
+3. FormData created with file
+4. POST /api/upload called
+5. Server validates file
+6. File uploaded to Cloudinary
+7. URL returned to client
+8. URL used in message/request/item
+
+7.3 IMAGE USAGE
+
+Chat Messages:
+- imageUrl field in Message model
+- Images displayed in chat bubbles
+- OptimizedImage component for lazy loading
+
+Wardrobe Items:
+- imageUrl field in WardrobeItem model
+- Images displayed in wardrobe grid
+- Used by AI chatbot for context
+
+Alteration Requests:
+- imageUrl field in AlterationRequest model
+- Shows item to be altered
+- Helps tailor understand request
+
+Design Requests:
+- imageUrl: Designer's work example
+- referenceImageUrl: Customer's inspiration image
+- Both displayed in request details
+
+Portfolio Items:
+- imageUrl field in PortfolioItem model
+- Designer's work samples
+- Customer can browse and save
+
+7.4 CLOUDINARY INTEGRATION
+
+Configuration:
+- Cloud name from environment
+- API key and secret from environment
+- Upload preset configured
+- Transformations for optimization
+
+Image Transformations:
+- Automatic format optimization
+- Responsive sizing
+- Quality optimization
+- Lazy loading support
+
+7.5 FILE DELETION
+
+DELETE /api/upload/[publicId]
+- Deletes file from Cloudinary
+- Used when item removed (wardrobe, etc.)
+- Prevents orphaned files
+
+================================================================================
+              8. AUTHENTICATION & AUTHORIZATION
+================================================================================
+
+8.1 AUTHENTICATION FLOW
+
+Login:
+1. Customer enters email/password
+2. POST /api/auth/login
+3. Server validates credentials
+4. JWT token generated
+5. Token stored in httpOnly cookie
+6. User data returned
+
+Session Management:
+- JWT token in httpOnly cookie
+- Token expires after 7 days (configurable)
+- Refresh token mechanism available
+- Auto-logout on token expiry
+
+8.2 AUTHORIZATION
+
+Role-Based Access:
+- Customer role required for customer endpoints
+- getCurrentUser() middleware validates JWT
+- Role checked in API endpoints
+- Unauthorized requests return 401/403
+
+CSRF Protection:
+- CSRF token required for state-changing operations
+- Token fetched via GET /api/security/csrf
+- Token validated in POST/PUT/DELETE requests
+- Prevents cross-site request forgery
+
+8.3 SECURITY FEATURES
+
+Password Hashing:
+- bcryptjs with salt rounds
+- Passwords never stored in plain text
+- Secure password requirements
+
+Input Sanitization:
+- sanitizeString() for text inputs
+- XSS prevention
+- SQL injection prevention (Prisma parameterized queries)
+
+Rate Limiting:
+- API rate limiting on sensitive endpoints
+- Prevents abuse
+- Configurable limits per endpoint
+
+8.4 USER CONTEXT
+
+UserContext Provider:
+- Global user state
+- Fetches user on mount
+- Provides user data to all components
+- Handles authentication state
+
+useUser Hook:
+- Access user data anywhere
+- isLoading state
+- Auto-refresh on token change
+
+================================================================================
+                           9. CHAT SYSTEM
+================================================================================
+
+9.1 CHAT CREATION
+
+New Chat Flow:
+1. Customer clicks "Chat Now" on designer/tailor
+2. POST /api/chat with designerId or tailorId
+3. Server checks if chat exists (unique constraint)
+4. If exists, returns existing chat
+5. If not, creates new chat
+6. Returns chat with ID
+7. Redirects to /customer/chats/[chatId]
+
+Chat Uniqueness:
+- One chat per customer-designer pair
+- One chat per customer-tailor pair
+- Enforced by database unique constraints
+- Prevents duplicate chats
+
+9.2 MESSAGE SENDING
+
+Send Flow:
+1. User types message and clicks send
+2. POST /api/chat/messages
+3. Server validates:
+   - User is chat participant
+   - Chat exists
+   - Content not empty (or image provided)
+4. Message created in database
+5. Socket.IO event emitted to chat room
+6. Notification created for recipient
+7. Response returned with message data
+8. Client updates UI optimistically
+
+Message Validation:
+- Content sanitized
+- Image URL validated
+- Chat ID validated
+- User authorization checked
+
+9.3 MESSAGE RECEIVING
+
+Real-Time Receiving:
+1. Socket.IO receives 'receive-message' event
+2. Client checks if message for current chat
+3. Checks for duplicates (by ID)
+4. Adds to messages state
+5. Sorts chronologically
+6. Scrolls to bottom
+7. Marks as read if visible
+
+Polling Fallback:
+1. If socket disconnected, polling starts
+2. GET /api/chat/messages every 10 seconds
+3. Compares with existing messages
+4. Adds new messages
+5. Stops when socket reconnects
+
+9.4 MESSAGE FEATURES
+
+Read Receipts:
+- Single check (✓): Sent
+- Double check (✓✓): Read
+- readAt timestamp stored
+- readBy user ID stored
+- Real-time updates via Socket.IO
+- Auto-mark on view
+
+Message Reactions:
+- Emoji reactions (👍, ❤️, 😂, 😮, 😢, 🔥)
+- Quick picker on hover
+- Toggle reactions (add/remove)
+- Grouped by emoji with count
+- Shows who reacted
+- Real-time updates via Socket.IO
+
+Typing Indicators:
+- Shows "X is typing..."
+- Animated dots
+- User avatar
+- Auto-stops after 2 seconds
+- Real-time via Socket.IO
+
+9.5 DESIGN REQUEST IN CHAT
+
+Request Flow:
+1. Customer clicks "Request Design" in chat
+2. Modal opens with form
+3. Customer enters description
+4. Optionally uploads reference image
+5. Submits via POST /api/design-requests
+6. Request linked to chat (chatId)
+7. Designer receives notification
+8. Request visible in designer dashboard
+
+================================================================================
+                        10. FEATURE BREAKDOWN
+================================================================================
+
+10.1 DASHBOARD OVERVIEW
+
+Purpose: Central hub for customer activity
+
+Components:
+- Statistics cards (chats, designers, wardrobe, consultations)
+- Recommended designers (top 5 by rating)
+- Recent activity feed
+- Quick action buttons
+- Premium upsell
+- Style tips
+
+Data Sources:
+- /api/chat (active chats count)
+- /api/chatbot/wardrobe (wardrobe count)
+- /api/alterations (consultations count)
+- /api/designers (recommended)
+- /api/notifications (activity)
+
+10.2 DESIGNER BROWSING
+
+Purpose: Find and connect with designers
+
+Features:
+- Search by name
+- Filter by niche, location, experience, budget, language
+- Sort by rating, experience, reviews
+- Pagination
+- Designer cards with key info
+- Quick chat initiation
+
+Search Algorithm:
+- Name search: case-insensitive contains
+- Niche filter: array contains
+- Location: exact match
+- Experience: range filter
+- Budget: range filter (from portfolio items)
+- Language: array contains
+
+10.3 TAILOR BROWSING
+
+Purpose: Find tailors for alterations
+
+Features:
+- Location-based search
+- Distance calculation (PostGIS)
+- Filter by skills, experience
+- Sort by distance, rating, experience
+- Tailor cards with distance
+- Quick alteration request
+- Contact information
+
+Distance Calculation:
+- Uses PostGIS ST_DWithin for filtering
+- Uses ST_Distance for sorting
+- Geography type (Point, 4326)
+- GIST index for performance
+
+10.4 WARDROBE MANAGEMENT
+
+Purpose: Manage personal clothing collection
+
+Features:
+- View all items in grid
+- Filter by subcategory
+- Search items
+- Upload new items with metadata
+- Delete items
+- Used by AI chatbot for recommendations
+
+Upload Process:
+1. Select image file
+2. Choose category (DRESS)
+3. Choose subcategory
+4. Enter color (optional)
+5. Enter name (optional)
+6. Upload to Cloudinary
+7. Save to database
+8. Refresh wardrobe list
+
+10.5 AI CHATBOT
+
+Purpose: Get personalized fashion advice
+
+Features:
+- Natural language conversation
+- Outfit recommendations
+- Style advice
+- Wardrobe suggestions
+- Designer/tailor recommendations
+- Context-aware responses
+
+AI Integration:
+- Gemini API for responses
+- System prompt with fashion expertise
+- User profile context (body shape, preferences)
+- Wardrobe context
+- Conversation history
+- Special formatting for recommendations
+
+Response Formatting:
+- [OUTFIT_START] ... [OUTFIT_END] for outfits
+- [DESIGNER_START] ... [DESIGNER_END] for designers
+- [TAILOR_START] ... [TAILOR_END] for tailors
+- [CHAT_DESIGNER:id:name] for chat links
+- [CHAT_TAILOR:id:name] for chat links
+
+10.6 VIRTUAL TRY-ON
+
+Purpose: Visualize outfits before purchase
+
+Features:
+- Upload outfit image
+- Body shape detection
+- Try-on processing
+- Result visualization
+- History of try-ons
+
+Implementation:
+- Image processing (future: ML model)
+- Body shape from profile
+- Overlay outfit on body
+- Save results
+
+10.7 ALTERATION REQUESTS
+
+Purpose: Request clothing alterations from tailors
+
+Features:
+- Create request with description and image
+- Track request status
+- View all requests
+- Filter by status
+- Search requests
+- View tailor details
+
+Request Lifecycle:
+1. PENDING: Waiting for tailor acceptance
+2. ACCEPTED: Tailor accepted request
+3. IN_PROGRESS: Tailor working on it
+4. COMPLETED: Alteration finished
+5. REJECTED: Tailor rejected request
+6. CANCELLED: Customer cancelled
+
+10.8 DESIGN REQUESTS
+
+Purpose: Request custom designs from designers
+
+Features:
+- Create request through chat or directly
+- Include description and reference images
+- Link to chat conversation
+- Track request status
+- Designer can quote price
+- Status updates
+
+Request Lifecycle:
+- Same as AlterationRequest statuses
+- Linked to chat for communication
+- Designer provides quotes and updates
+
+10.9 REVIEWS & RATINGS
+
+Purpose: Rate and review designers/tailors
+
+Features:
+- Leave one review per designer/tailor
+- Rating: 1-5 stars
+- Optional comment
+- Reviews visible on profiles
+- Affects designer/tailor ratings
+- Can edit own review (future)
+
+Rating Calculation:
+- Average of all ratings
+- Updated automatically
+- Review count incremented
+- Used for sorting and recommendations
+
+================================================================================
+                 11. TECHNICAL IMPLEMENTATION DETAILS
+================================================================================
+
+11.1 FRONTEND ARCHITECTURE
+
+Framework: Next.js 15 (App Router)
+Language: TypeScript
+Styling: Tailwind CSS
+State Management: React Hooks (useState, useEffect, useMemo, useCallback)
+Real-time: Socket.IO Client
+
+Component Structure:
+- Pages: src/app/(dashboard)/customer/*
+- Components: src/components/chat/*, src/components/ui/*
+- Hooks: src/hooks/*
+- Contexts: src/contexts/*
+- Utils: src/lib/utils/*
+
+11.2 BACKEND ARCHITECTURE
+
+Framework: Next.js API Routes
+Database: PostgreSQL with Prisma ORM
+File Storage: Cloudinary
+Real-time: Socket.IO Server (standalone)
+AI: Google Gemini API
+
+API Structure:
+- Routes: src/app/api/*
+- Middleware: src/middleware.ts
+- Auth: src/lib/auth/*
+- Security: src/lib/security/*
+- Database: src/lib/db/prisma.ts
+
+11.3 DATABASE OPTIMIZATION
+
+Indexes:
+- All foreign keys indexed
+- Composite indexes for common queries
+- GIST index for PostGIS geography
+- GIN index for array fields (skills, niches)
+
+Query Optimization:
+- Select only needed fields
+- Use include for relations
+- Pagination for large datasets
+- Cursor-based pagination for messages
+- Batch queries to avoid N+1
+
+Connection Pooling:
+- Supabase PgBouncer enabled
+- connection_limit: 20
+- pool_timeout: 10
+- connect_timeout: 5
+
+11.4 PERFORMANCE OPTIMIZATIONS
+
+Frontend:
+- React.memo for expensive components
+- useMemo for computed values
+- useCallback for stable functions
+- Lazy loading for images
+- Code splitting for routes
+- Debouncing for search inputs
+
+Backend:
+- API response caching
+- Database query optimization
+- Connection pooling
+- Rate limiting
+- Input validation and sanitization
+
+11.5 ERROR HANDLING
+
+Frontend:
+- Try-catch blocks for async operations
+- Error boundaries (future)
+- User-friendly error messages
+- Loading states
+- Empty states
+
+Backend:
+- Try-catch in all API routes
+- Proper HTTP status codes
+- Detailed error messages (dev)
+- Generic error messages (prod)
+- Logging for debugging
+
+11.6 SECURITY MEASURES
+
+Authentication:
+- JWT tokens in httpOnly cookies
+- Token expiration
+- Refresh tokens
+- Password hashing (bcrypt)
+
+Authorization:
+- Role-based access control
+- User ownership validation
+- Chat participant validation
+
+Input Validation:
+- Type checking
+- Length limits
+- Format validation
+- Sanitization
+
+CSRF Protection:
+- CSRF tokens
+- Same-origin policy
+- Token validation
+
+Rate Limiting:
+- Per-endpoint limits
+- Per-user limits
+- IP-based limits
+
+SQL Injection Prevention:
+- Prisma parameterized queries
+- Input sanitization
+- No raw SQL with user input
+
+XSS Prevention:
+- Input sanitization
+- Output encoding
+- Content Security Policy (future)
+
+11.7 REAL-TIME IMPLEMENTATION
+
+Socket.IO Server:
+- Standalone server on port 3001
+- HTTP server for health checks
+- Room-based messaging
+- User presence tracking
+
+Socket.IO Client:
+- Singleton pattern
+- Auto-reconnect
+- Event listeners
+- Cleanup on unmount
+
+Fallback:
+- Polling when socket disconnected
+- 10-second interval
+- Stops on reconnect
+
+11.8 FILE UPLOAD IMPLEMENTATION
+
+Client:
+- File input with validation
+- FormData creation
+- Progress tracking (future)
+- Preview before upload
+
+Server:
+- Multer or FormData parsing
+- File validation (type, size)
+- Cloudinary upload
+- URL storage in database
+
+Cloudinary:
+- Automatic optimization
+- Responsive images
+- Format conversion
+- CDN delivery
+
+================================================================================
+                        12. DATA FLOW DIAGRAMS
+================================================================================
+
+12.1 CHAT MESSAGE FLOW
+
+Customer                    API                    Database              Socket.IO              Designer
+   |                        |                        |                      |                      |
+   |--POST /api/chat/------>|                        |                      |                      |
+   |   messages             |                        |                      |                      |
+   |                        |--Validate user-------->|                      |                      |
+   |                        |--Create message------->|                      |                      |
+   |                        |<--Message created------|                      |                      |
+   |                        |--Emit to room--------->|                      |                      |
+   |                        |                        |                      |--Broadcast---------->|
+   |<--Response with msg----|                        |                      |                      |
+   |                        |                        |                      |                      |
+   |                        |                        |                      |<--Receive message----|
+   |                        |                        |                      |                      |
+
+12.2 DESIGN REQUEST FLOW
+
+Customer                    API                    Database              Notification            Designer
+   |                        |                        |                      |                      |
+   |--POST /api/design------>|                        |                      |                      |
+   |   -requests             |                        |                      |                      |
+   |                        |--Validate user-------->|                      |                      |
+   |                        |--Create request------->|                      |                      |
+   |                        |<--Request created------|                      |                      |
+   |                        |--Create notification--->|                      |                      |
+   |                        |                        |                      |--Send notification-->|
+   |<--Response with req----|                        |                      |                      |
+   |                        |                        |                      |                      |
+
+12.3 ALTERATION REQUEST FLOW
+
+Customer                    API                    Database              Notification            Tailor
+   |                        |                        |                      |                      |
+   |--POST /api/alterations->|                        |                      |                      |
+   |                        |--Validate user-------->|                      |                      |
+   |                        |--Create request------->|                      |                      |
+   |                        |<--Request created------|                      |                      |
+   |                        |--Create notification--->|                      |                      |
+   |                        |                        |                      |--Send notification-->|
+   |<--Response with req----|                        |                      |                      |
+   |                        |                        |                      |                      |
+
+12.4 WARDROBE UPLOAD FLOW
+
+Customer                    API                    Cloudinary            Database
+   |                        |                        |                      |
+   |--POST /api/upload----->|                        |                      |
+   |   (FormData)           |                        |                      |
+   |                        |--Upload file---------->|                      |
+   |                        |<--URL returned---------|                      |
+   |                        |--Save to DB----------->|                      |
+   |                        |<--Item saved-----------|                      |
+   |<--Response with item---|                        |                      |
+
+12.5 AI CHATBOT FLOW
+
+Customer                    API                    Gemini API            Database
+   |                        |                        |                      |
+   |--POST /api/chatbot----->|                        |                      |
+   |   (message)            |                        |                      |
+   |                        |--Get wardrobe---------->|                      |
+   |                        |<--Wardrobe items--------|                      |
+   |                        |--Get user profile------>|                      |
+   |                        |<--Profile data----------|                      |
+   |                        |--Call Gemini API------->|                      |
+   |                        |                        |--Process request---->|
+   |                        |                        |<--Response-----------|
+   |                        |--Save to DB----------->|                      |
+   |                        |<--Message saved---------|                      |
+   |<--Response with AI msg-|                        |                      |
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
+
+This documentation covers all aspects of the Customer Dashboard in the Neural
+Threads application. For additional details on specific features or
+implementation, refer to the source code files mentioned in each section.
+
+Last Updated: 2024
+Version: 1.0
+

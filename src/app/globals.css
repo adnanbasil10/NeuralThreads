@@ -1,27 +1,700 @@
+/* Font imports with better browser compatibility */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Preload critical fonts for better performance */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Inter Regular'), local('Inter-Regular');
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Playfair Display Regular'), local('PlayfairDisplay-Regular');
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Luxury shimmer animation for skeleton loaders */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
   }
 }
 
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
+}
+
+/* Luxury gradient shimmer for premium feel */
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(232, 222, 208, 0.1) 0%,
+    rgba(245, 240, 232, 0.3) 50%,
+    rgba(232, 222, 208, 0.1) 100%
+  );
+  animation: shimmer 2.5s infinite;
+  animation-delay: 0.5s;
+}
+
+/* Prevent horizontal scrolling and ensure proper box-sizing */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
+  /* Fix for mobile viewport issues */
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+  max-width: 100vw;
+  position: relative;
+  /* Fix for mobile viewport issues */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* Ensure all containers respect viewport width */
+* {
+  box-sizing: border-box;
+}
+
+/* Fix gaps between sidebar and main content */
+/* Remove margins/padding that might cause gaps in dashboard layout */
+.dashboard-container {
+  margin: 0;
+  padding: 0;
+  gap: 0;
+}
+
+/* Force sidebar to have no margin/padding that causes gaps */
+aside[class*="sidebar"],
+aside[class*="fixed"],
+aside[class*="relative"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Ensure main content area has no left margin/padding next to sidebar */
+main[class*="flex-1"],
+div[class*="flex-1"][class*="flex"][class*="flex-col"] {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Remove any default body/html padding that could cause gaps */
+body > div {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Fix for fixed/absolute positioned elements */
+body > * {
+  max-width: 100vw;
+}
+
+:root {
+  /* Luxury Beige/Cream Color Palette */
+  --beige-soft: #E8DED0;
+  --cream-warm: #F5F0E8;
+  --sand-light: #EDE6DB;
+  --beige-pure: #D9CFC1;
+  
+  --taupe-deep: #9B8B7E;
+  --brown-warm: #8B7A6B;
+  --rose-soft: #D4B5A8;
+  --pink-dusty: #C9A899;
+  
+  --heading-primary: #4A3F35;
+  --text-body: #6B5F52;
+  --text-secondary: #8B7E71;
+  --text-muted: #A39689;
+  
+  --white-pure: #FFFFFF;
+  --white-off: #FAF8F5;
+  
+  --background: #E8DED0;
+  --foreground: #6B5F52;
+}
+
+/* Base Styles */
+body {
+  color: var(--text-body);
+  background: var(--beige-soft);
+  background-color: #E8DED0; /* Fallback for browsers that don't support CSS variables */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 400;
+  line-height: 1.6;
+  /* Prevent layout shift */
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* Typography System */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  color: var(--heading-primary);
+  color: #4A3F35; /* Fallback */
+  letter-spacing: -0.02em;
+  font-weight: 400;
+  line-height: 1.2;
+  /* Prevent font loading layout shift */
+  font-display: swap;
+}
+
+.heading-hero {
+  font-size: 4.5rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--heading-primary);
+}
+
+.heading-section {
+  font-size: 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--heading-primary);
+}
+
+p, span, div, a, button, input, textarea, select {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-body);
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Remove default margins */
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure no horizontal scroll */
+body {
+  overflow-x: hidden;
+}
+
+/* Fix sidebar scrolling on Chrome */
+aside {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Smooth transitions */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Selection Color */
+::selection {
+  background-color: rgba(212, 181, 168, 0.3);
+  color: var(--heading-primary);
 }
 
 @layer utilities {
   .text-balance {
-    text-wrap: balance;
+    /* Fallback for browsers that don't support text-wrap: balance */
+    text-align: left;
   }
+  
+  @supports (text-wrap: balance) {
+    .text-balance {
+      text-wrap: balance;
+    }
+  }
+}
+
+/* Custom Animations */
+@layer utilities {
+  /* Fade In */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  /* Fade Up */
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  /* Pulse Soft */
+  .animate-pulse-soft {
+    animation: pulseSoft 4s ease-in-out infinite;
+  }
+
+  /* Scale In */
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  /* Slide In from Left */
+  .animate-slide-in-left {
+    animation: slideInLeft 0.4s ease-out forwards;
+  }
+
+  /* Slide In from Right */
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s ease-out forwards;
+  }
+
+  /* Float */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Shimmer - Luxury gradient */
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      rgba(249, 219, 189, 0.1) 0%,
+      rgba(249, 219, 189, 0.3) 50%,
+      rgba(249, 219, 189, 0.1) 100%
+    );
+    background-size: 200% 100%;
+  }
+  
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #EDE6DB 0%,
+      #F5F0E8 50%,
+      #EDE6DB 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Gradient Text - Luxury Beige */
+.gradient-text {
+  color: #8B7A6B; /* Fallback color for browsers that don't support background-clip: text */
+  background: linear-gradient(135deg, #8B7A6B 0%, #9B8B7E 50%, #D4B5A8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@supports not (-webkit-background-clip: text) {
+  .gradient-text {
+    color: #8B7A6B;
+    -webkit-text-fill-color: #8B7A6B;
+  }
+}
+
+/* Glass Effect - Luxury Beige */
+.glass {
+  background: rgba(245, 240, 232, 0.95); /* Fallback for browsers without backdrop-filter */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(217, 207, 193, 0.3);
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass {
+    background: rgba(245, 240, 232, 0.95);
+  }
+}
+
+.glass-dark {
+  background: rgba(232, 222, 208, 0.95); /* Fallback for browsers without backdrop-filter */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(217, 207, 193, 0.4);
+}
+
+@supports not (backdrop-filter: blur(10px)) {
+  .glass-dark {
+    background: rgba(232, 222, 208, 0.95);
+  }
+}
+
+/* Custom Scrollbar - Luxury Beige */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream-warm);
+  background-color: #F5F0E8; /* Fallback */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9B8B7E; /* Fallback */
+  background: linear-gradient(135deg, #9B8B7E, #D4B5A8);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8B7A6B; /* Fallback */
+  background: linear-gradient(135deg, #8B7A6B, #C9A899);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #9B8B7E #F5F0E8;
+}
+
+/* Focus Styles - Luxury Beige */
+*:focus-visible {
+  outline: 2px solid var(--rose-soft);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Button Hover Effects - Luxury Beige */
+.btn-glow:hover {
+  box-shadow: 0 0 20px rgba(212, 181, 168, 0.3);
+}
+
+/* Card Hover Effects - Soft Luxury */
+.card-hover {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(75, 63, 53, 0.08);
+}
+
+/* Gradient Borders - Luxury Beige */
+.gradient-border {
+  position: relative;
+  background: var(--cream-warm);
+  border-radius: 16px;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(135deg, #E8DED0, #F5F0E8, #D4B5A8);
+  border-radius: 18px;
+  z-index: -1;
+}
+
+/* Loading Skeleton - Luxury Beige */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #EDE6DB 25%,
+    #F5F0E8 50%,
+    #EDE6DB 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Responsive Typography - Desktop-first approach */
+/* Base styles are for desktop, scale down for mobile */
+html {
+  font-size: 16px; /* Desktop default */
+}
+
+@media (max-width: 1023px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 767px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* Mobile Safe Areas */
+.safe-area-pb {
+  padding-bottom: 1rem; /* Fallback */
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.safe-area-pt {
+  padding-top: 1rem; /* Fallback */
+  padding-top: max(1rem, env(safe-area-inset-top));
+}
+
+.safe-area-inset-bottom {
+  bottom: 0; /* Fallback */
+  bottom: env(safe-area-inset-bottom);
+}
+
+/* Touch-friendly targets */
+@layer utilities {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Mobile animations */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.animate-slide-down {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.animate-slide-in-bottom {
+  animation: slideInFromBottom 0.3s ease-out forwards;
+}
+
+/* Prevent pull-to-refresh on mobile */
+.no-pull-refresh {
+  overscroll-behavior-y: contain;
+}
+
+/* Smooth scrolling container for mobile */
+.scroll-smooth-mobile {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  /* Fix for iOS Safari bounce */
+  overscroll-behavior-y: contain;
+  -webkit-overscroll-behavior-y: contain;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile tap highlight - Luxury Beige */
+@media (hover: none) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: rgba(212, 181, 168, 0.2);
+  }
+}
+
+/* Responsive container padding */
+.container-mobile {
+  padding-left: 1rem; /* Fallback */
+  padding-right: 1rem; /* Fallback */
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+/* Bottom sheet overlay */
+.overlay-blur {
+  background: rgba(0, 0, 0, 0.5); /* Fallback */
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@supports not (backdrop-filter: blur(4px)) {
+  .overlay-blur {
+    background: rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Fixed bottom bar safe area */
+.fixed-bottom-safe {
+  bottom: 0;
+  padding-bottom: 0; /* Fallback */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Skeleton shimmer animation */
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #EDE6DB 25%,
+    #F5F0E8 50%,
+    #EDE6DB 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s ease-in-out infinite;
 }
