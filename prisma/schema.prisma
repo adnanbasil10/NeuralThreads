@@ -3,13 +3,11 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  extensions = [postgis]
 }
 
 // ============================================
@@ -195,14 +193,9 @@ model Tailor {
   reviews            Review[]
   chats              Chat[]
 
-  // PostGIS location column
-  locationPoint Unsupported("geography(Point, 4326)")?
-
   @@index([userId])
   @@index([location])
   @@index([latitude, longitude])
-  @@index([skills], type: Gin)
-  @@index([locationPoint], type: Gist)
 }
 
 model PortfolioItem {

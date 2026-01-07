@@ -14,13 +14,9 @@ if (!process.env.DATABASE_URL) {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    errorFormat: 'pretty',
-    // Connection pool is configured via DATABASE_URL parameters:
-    // - connection_limit: Max connections per instance (recommended: 15-20 for Supabase)
-    // - pool_timeout: Wait time for available connection (recommended: 10s)
-    // - connect_timeout: Connection establishment timeout (recommended: 5s)
-    // Example: postgresql://...?connection_limit=20&pool_timeout=10&connect_timeout=5
+    // Only log errors in production for speed
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+    errorFormat: 'minimal',
   });
 
 // Test database connection on initialization
