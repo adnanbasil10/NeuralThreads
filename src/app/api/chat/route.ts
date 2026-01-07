@@ -353,7 +353,6 @@ export async function GET(request: NextRequest) {
           customer: {
             select: {
               id: true,
-              profilePhoto: true,
               user: {
                 select: { id: true, name: true, email: true },
               },
@@ -365,7 +364,7 @@ export async function GET(request: NextRequest) {
       });
 
       const chatIds = chats.map(chat => chat.id);
-      
+
       if (chatIds.length === 0) {
         return NextResponse.json({
           success: true,
@@ -421,8 +420,8 @@ export async function GET(request: NextRequest) {
       // Combine all data
       const chatsWithData = chats.map((chat) => ({
         ...chat,
-        messages: lastMessageMap.has(chat.id) 
-          ? [lastMessageMap.get(chat.id)!] 
+        messages: lastMessageMap.has(chat.id)
+          ? [lastMessageMap.get(chat.id)!]
           : [],
         unreadCount: unreadCountMap.get(chat.id) || 0,
       }));
@@ -458,7 +457,6 @@ export async function GET(request: NextRequest) {
           customer: {
             select: {
               id: true,
-              profilePhoto: true,
               user: {
                 select: { id: true, name: true, email: true },
               },
@@ -470,7 +468,7 @@ export async function GET(request: NextRequest) {
       });
 
       const chatIds = chats.map(chat => chat.id);
-      
+
       if (chatIds.length === 0) {
         return NextResponse.json({
           success: true,
@@ -526,8 +524,8 @@ export async function GET(request: NextRequest) {
       // Combine all data
       const chatsWithData = chats.map((chat) => ({
         ...chat,
-        messages: lastMessageMap.has(chat.id) 
-          ? [lastMessageMap.get(chat.id)!] 
+        messages: lastMessageMap.has(chat.id)
+          ? [lastMessageMap.get(chat.id)!]
           : [],
         unreadCount: unreadCountMap.get(chat.id) || 0,
       }));

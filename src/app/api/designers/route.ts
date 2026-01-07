@@ -6,7 +6,7 @@ import { apiCache, generateCacheKey } from '@/lib/cache/api-cache';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Check cache first
     const cacheKey = generateCacheKey('/api/designers', Object.fromEntries(searchParams));
     const cached = apiCache.get<any>(cacheKey);
@@ -93,7 +93,7 @@ export async function GET(request: NextRequest) {
           },
         },
         portfolioItems: {
-          take: 10, // Show more portfolio items to reflect recent changes
+          take: 3, // Reduced from 10 to 3 for performance optimization
           orderBy: {
             createdAt: 'desc',
           },
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
         );
         return hasItemInBudget || designer.portfolioItems.length === 0;
       });
-      
+
       // If budget filtering reduced results, we may need to fetch more
       // For now, we'll return what we have and let the client handle pagination
     }
@@ -130,10 +130,10 @@ export async function GET(request: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     };
-    
+
     // Cache the response for 2 minutes
     apiCache.set(cacheKey, response, 2 * 60 * 1000);
-    
+
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching designers:', error);

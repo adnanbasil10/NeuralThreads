@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyTokenEdge } from "@/lib/auth/jwt-edge";
-import { COOKIE_NAME } from "@/lib/auth/jwt";
+import { COOKIE_NAME } from "@/lib/auth/constants";
 
 const protectedRoutes = ["/customer", "/designer", "/tailor"];
 const authRoutes = ["/login", "/signup"];
@@ -46,7 +46,7 @@ export function middleware(request: NextRequest) {
 
   // Create response with proper cache headers
   const response = NextResponse.next();
-  
+
   // Prevent caching of auth and protected routes
   if (isProtected || isAuthRoute) {
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");

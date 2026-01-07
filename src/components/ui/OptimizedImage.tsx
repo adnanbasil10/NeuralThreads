@@ -37,18 +37,18 @@ export const OptimizedImage = React.memo(function OptimizedImage({
   const [isInView, setIsInView] = useState(priority);
 
   // Validate src URL first
-  const isValidUrl = src && typeof src === 'string' && src.trim() !== '' && 
+  const isValidUrl = src && typeof src === 'string' && src.trim() !== '' &&
     (src.startsWith('http') || src.startsWith('https') || src.startsWith('data:') || src.startsWith('/'));
 
   // Process image URL - MUST be defined after validation, before any conditional returns
   const processedSrc = useMemo(() => {
     if (!src || typeof src !== 'string') return '';
-    
+
     // Convert to WebP format via Cloudinary if it's a Cloudinary URL
     if (src.includes('cloudinary.com') && !src.includes('f_webp')) {
       return src.replace(/\/upload\//, '/upload/f_webp,q_auto/');
     }
-    
+
     return src;
   }, [src]);
 
@@ -89,11 +89,12 @@ export const OptimizedImage = React.memo(function OptimizedImage({
   if (hasError) {
     // Try fallback to regular img tag on error
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={processedSrc}
         alt={alt}
         className={`transition-opacity duration-300 ${className}`}
-        style={{ 
+        style={{
           objectFit,
           width: fill ? '100%' : width,
           height: fill ? '100%' : height,
@@ -125,10 +126,9 @@ export const OptimizedImage = React.memo(function OptimizedImage({
             <img
               src={processedSrc}
               alt={alt}
-              className={`transition-opacity duration-300 ${
-                isLoading ? 'opacity-0' : 'opacity-100'
-              }`}
-              style={{ 
+              className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'
+                }`}
+              style={{
                 objectFit,
                 width: fill ? '100%' : width,
                 height: fill ? '100%' : height,
@@ -150,9 +150,8 @@ export const OptimizedImage = React.memo(function OptimizedImage({
               priority={priority}
               quality={85}
               unoptimized={processedSrc.startsWith('data:') || processedSrc.includes('unsplash.com')}
-              className={`transition-opacity duration-300 ${
-                isLoading ? 'opacity-0' : 'opacity-100'
-              }`}
+              className={`transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'
+                }`}
               style={{ objectFit }}
               onLoad={() => setIsLoading(false)}
               onError={() => {

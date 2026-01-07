@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const NEXT_CONFIG = {
   reactStrictMode: true,
+  compress: true,
   eslint: {
     // Warning: This allows production builds to successfully complete even if
     // your project has ESLint errors. We'll fix these incrementally.
@@ -66,11 +67,11 @@ const NEXT_CONFIG = {
           },
           ...(isProduction
             ? [
-                {
-                  key: "Strict-Transport-Security",
-                  value: "max-age=63072000; includeSubDomains; preload",
-                },
-              ]
+              {
+                key: "Strict-Transport-Security",
+                value: "max-age=63072000; includeSubDomains; preload",
+              },
+            ]
             : []),
         ],
       },

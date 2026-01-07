@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/db/prisma';
-
-export type NotificationType = 'MESSAGE' | 'CHAT_REQUEST' | 'REVIEW' | 'PROFILE_VIEW' | 'ORDER_UPDATE';
+import { NotificationType } from '@prisma/client';
 
 interface CreateNotificationParams {
   userId: string;

@@ -3,7 +3,7 @@
  * This is used in middleware which runs in Edge Runtime
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || 'neural-threads-secret-key';
+import { JWT_SECRET } from './constants';
 
 export interface TokenPayload {
   userId: string;
@@ -19,12 +19,12 @@ export interface TokenPayload {
 function base64UrlDecode(str: string): Uint8Array {
   // Replace URL-safe characters
   str = str.replace(/-/g, '+').replace(/_/g, '/');
-  
+
   // Add padding if needed
   while (str.length % 4) {
     str += '=';
   }
-  
+
   // Decode base64
   const binaryString = atob(str);
   const bytes = new Uint8Array(binaryString.length);

@@ -9,9 +9,10 @@ import { chatLimiter, enforceRateLimit, RateLimitError } from '@/lib/security/ra
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
+    const { messageId } = await params;
     const user = await getCurrentUser();
 
     if (!user) {
@@ -36,8 +37,6 @@ export async function POST(
       }
       throw error;
     }
-
-    const { messageId } = params;
 
     if (!messageId) {
       return NextResponse.json(

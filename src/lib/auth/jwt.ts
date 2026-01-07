@@ -2,11 +2,13 @@ import jwt from 'jsonwebtoken';
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET: string = process.env.JWT_SECRET || 'neural-threads-secret-key';
-const ACCESS_TOKEN_EXPIRY: string = process.env.JWT_ACCESS_EXPIRY || '7d'; // Extended from 15m to 7d for better UX
-const REFRESH_TOKEN_EXPIRY: string = process.env.JWT_REFRESH_EXPIRY || '30d';
-const COOKIE_NAME = 'auth_token';
-const REFRESH_COOKIE_NAME = 'auth_refresh';
+import {
+  COOKIE_NAME,
+  REFRESH_COOKIE_NAME,
+  JWT_SECRET,
+  ACCESS_TOKEN_EXPIRY,
+  REFRESH_TOKEN_EXPIRY
+} from './constants';
 
 export interface TokenPayload {
   userId: string;
@@ -165,11 +167,11 @@ export function verifyEmailToken(token: string): { userId: string; email: string
       email: string;
       type: string;
     };
-    
+
     if (decoded.type !== 'email_verification') {
       return null;
     }
-    
+
     return { userId: decoded.userId, email: decoded.email };
   } catch (error) {
     return null;
@@ -197,11 +199,11 @@ export function verifyPasswordResetToken(token: string): { userId: string; email
       email: string;
       type: string;
     };
-    
+
     if (decoded.type !== 'password_reset') {
       return null;
     }
-    
+
     return { userId: decoded.userId, email: decoded.email };
   } catch (error) {
     return null;

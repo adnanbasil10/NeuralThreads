@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     const user = await getCurrentUser();
     if (!user || user.role !== 'CUSTOMER') {
       return NextResponse.json(
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
         const { createNotification } = await import('@/lib/notifications/createNotification');
         await createNotification({
           userId: designer.user.id,
-          type: 'DESIGN_ORDER',
+          type: 'DESIGN_ORDER' as any,
           title: `New design request from ${designRequest.customer.user.name}`,
           message: description.length > 100 ? description.substring(0, 100) + '...' : description,
           link: `/designer/requests?id=${designRequest.id}`,
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Create design request error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Failed to create design request';
-    
+
     // Always return JSON, never HTML
     // Handle CSRF errors specifically (though they should be caught above)
     if (errorMessage.includes('CSRF') || errorMessage.includes('csrf')) {
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    
+
     // Handle Prisma/database errors
     if (errorMessage.includes('Unique constraint') || errorMessage.includes('P2002')) {
       return NextResponse.json(
@@ -150,7 +150,7 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
-    
+
     return NextResponse.json(
       { success: false, message: errorMessage, error: errorMessage },
       { status: 500 }

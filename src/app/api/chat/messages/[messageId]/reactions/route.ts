@@ -10,9 +10,10 @@ import { chatLimiter, enforceRateLimit, RateLimitError } from '@/lib/security/ra
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
+    const { messageId } = await params;
     // Validate CSRF token
     try {
       validateCsrfToken(request);
@@ -48,7 +49,6 @@ export async function POST(
       throw error;
     }
 
-    const { messageId } = params;
     const body = await request.json();
     const { emoji, action = 'toggle' } = body; // action: 'add' | 'remove' | 'toggle'
 
@@ -237,9 +237,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { messageId: string } }
+  { params }: { params: Promise<{ messageId: string }> }
 ) {
   try {
+    const { messageId } = await params;
     const user = await getCurrentUser();
 
     if (!user) {
@@ -248,8 +249,6 @@ export async function GET(
         { status: 401 }
       );
     }
-
-    const { messageId } = params;
 
     if (!messageId) {
       return NextResponse.json(

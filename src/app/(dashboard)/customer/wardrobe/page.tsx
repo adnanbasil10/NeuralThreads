@@ -33,7 +33,7 @@ interface WardrobeItem {
 }
 
 const DRESS_SUBCATEGORIES = [
-  { value: '', label: 'All Dress Types' },
+  { value: '', label: 'All Categories' },
   { value: 'BRIDAL', label: 'Bridal' },
   { value: 'CASUAL', label: 'Casual' },
   { value: 'FORMAL', label: 'Formal' },
@@ -138,9 +138,7 @@ export default function WardrobePage() {
   const inferSubcategory = (item: WardrobeItem): string | null => {
     if (item.subcategory) return item.subcategory;
     
-    // Only infer for DRESS category items
-    if (item.category !== 'DRESS') return null;
-    
+    // Check name for keywords regardless of category
     const searchText = (item.name || '').toLowerCase();
     
     if (searchText.includes('bridal') || searchText.includes('wedding') || searchText.includes('saree') || searchText.includes('lehenga')) {
