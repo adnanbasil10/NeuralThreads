@@ -1,0 +1,137 @@
+
+> neural_threads@0.1.0 build
+> prisma generate && next build
+
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Prisma schema loaded from prisma/schema.prisma
+┌─────────────────────────────────────────────────────────┐
+│  Update available 6.19.0 -> 7.4.0                       │
+│                                                         │
+│  This is a major update - please follow the guide at    │
+│  https://pris.ly/d/major-version-upgrade                │
+│                                                         │
+│  Run the following to update                            │
+│    npm i --save-dev prisma@latest                       │
+│    npm i @prisma/client@latest                          │
+└─────────────────────────────────────────────────────────┘
+
+✔ Generated Prisma Client (v6.19.0) to ./node_modules/@prisma/client in 186ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+   ▲ Next.js 15.2.8
+
+   Creating an optimized production build ...
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ✓ Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+❌ DATABASE_URL environment variable is not set!
+Please set DATABASE_URL in your .env.local file
+Example: DATABASE_URL="postgresql://user:password@localhost:5432/neural_threads"
+   Generating static pages (0/58) ...
+❌ DATABASE_URL environment variable is not set!
+Please set DATABASE_URL in your .env.local file
+Example: DATABASE_URL="postgresql://user:password@localhost:5432/neural_threads"
+   Generating static pages (14/58) 
+   Generating static pages (28/58) 
+   Generating static pages (43/58) 
+ ✓ Generating static pages (58/58)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                      Size  First Load JS
+┌ ○ /                                         6.64 kB         111 kB
+├ ○ /_not-found                                 255 B         102 kB
+├ ƒ /[role]/settings                          9.36 kB         132 kB
+├ ƒ /api/alterations                            255 B         102 kB
+├ ƒ /api/alterations/[id]                       255 B         102 kB
+├ ƒ /api/auth/login                             255 B         102 kB
+├ ƒ /api/auth/logout                            255 B         102 kB
+├ ƒ /api/auth/me                                255 B         102 kB
+├ ƒ /api/auth/refresh                           255 B         102 kB
+├ ƒ /api/auth/register                          255 B         102 kB
+├ ƒ /api/auth/resend-verification               255 B         102 kB
+├ ƒ /api/auth/signup                            255 B         102 kB
+├ ƒ /api/auth/verify-email                      255 B         102 kB
+├ ƒ /api/chat                                   255 B         102 kB
+├ ƒ /api/chat/messages                          255 B         102 kB
+├ ƒ /api/chat/messages/[messageId]/reactions    255 B         102 kB
+├ ƒ /api/chat/messages/[messageId]/read         255 B         102 kB
+├ ƒ /api/chatbot                                255 B         102 kB
+├ ƒ /api/chatbot/conversations                  255 B         102 kB
+├ ƒ /api/chatbot/conversations/[id]             255 B         102 kB
+├ ƒ /api/chatbot/conversations/[id]/messages    255 B         102 kB
+├ ƒ /api/chatbot/wardrobe                       255 B         102 kB
+├ ƒ /api/current-user                           255 B         102 kB
+├ ƒ /api/design-requests                        255 B         102 kB
+├ ƒ /api/design-requests/[id]                   255 B         102 kB
+├ ƒ /api/designers                              255 B         102 kB
+├ ƒ /api/designers/[id]                         255 B         102 kB
+├ ƒ /api/designers/portfolio                    255 B         102 kB
+├ ƒ /api/designers/portfolio/[id]               255 B         102 kB
+├ ƒ /api/designs                                255 B         102 kB
+├ ƒ /api/notifications                          255 B         102 kB
+├ ƒ /api/reviews                                255 B         102 kB
+├ ƒ /api/security/csrf                          255 B         102 kB
+├ ƒ /api/tailors                                255 B         102 kB
+├ ƒ /api/tailors/[id]                           255 B         102 kB
+├ ƒ /api/tailors/sample-work                    255 B         102 kB
+├ ƒ /api/tailors/sample-work/[id]               255 B         102 kB
+├ ƒ /api/test-db                                255 B         102 kB
+├ ƒ /api/test-email                             255 B         102 kB
+├ ƒ /api/upload                                 255 B         102 kB
+├ ƒ /api/upload/[publicId]                      255 B         102 kB
+├ ƒ /api/users/account                          255 B         102 kB
+├ ƒ /api/users/password                         255 B         102 kB
+├ ƒ /api/users/profile                          255 B         102 kB
+├ ○ /customer                                 6.51 kB         115 kB
+├ ○ /customer/alterations                     4.25 kB         116 kB
+├ ○ /customer/chatbot                         2.23 kB         103 kB
+├ ○ /customer/chats                           4.45 kB         118 kB
+├ ƒ /customer/chats/[chatId]                  11.7 kB         171 kB
+├ ○ /customer/chats/new                       2.22 kB         105 kB
+├ ○ /customer/designers                       7.42 kB         120 kB
+├ ƒ /customer/designers/[id]                  9.88 kB         123 kB
+├ ○ /customer/designs                         8.03 kB         121 kB
+├ ○ /customer/tailors                         11.7 kB         141 kB
+├ ○ /customer/wardrobe                        5.49 kB         127 kB
+├ ○ /designer                                 6.58 kB         123 kB
+├ ○ /designer/chats                           7.44 kB         144 kB
+├ ƒ /designer/chats/[chatId]                   7.1 kB         146 kB
+├ ○ /designer/portfolio                        6.7 kB         144 kB
+├ ○ /designer/profile                         7.31 kB         125 kB
+├ ○ /designer/requests                        5.18 kB         121 kB
+├ ○ /login                                    5.47 kB         110 kB
+├ ○ /signup                                   2.52 kB         107 kB
+├ ○ /signup/customer                          48.1 kB         163 kB
+├ ○ /signup/designer                          9.59 kB         132 kB
+├ ○ /signup/tailor                            9.86 kB         133 kB
+├ ○ /tailor                                   7.18 kB         124 kB
+├ ○ /tailor/chats                              7.5 kB         144 kB
+├ ○ /tailor/requests                          7.74 kB         120 kB
+├ ○ /tailor/sample-work                       6.49 kB         138 kB
+├ ○ /verify-email                             3.38 kB         108 kB
+└ ○ /verify-email/confirm                     6.52 kB         111 kB
++ First Load JS shared by all                  101 kB
+  ├ chunks/1684-bcfd7d81617d0806.js           45.8 kB
+  ├ chunks/4bd1b696-380e78f1ab754ae3.js       53.3 kB
+  └ other shared chunks (total)                2.2 kB
+
+
+ƒ Middleware                                  32.9 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
